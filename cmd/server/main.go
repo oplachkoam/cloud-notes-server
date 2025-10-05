@@ -10,11 +10,13 @@ import (
 	"cloud-notes/internal/database/postgres"
 	"cloud-notes/internal/database/redis"
 	authHandler "cloud-notes/internal/handlers/auth"
+	notesHandler "cloud-notes/internal/handlers/notes"
 	userHandler "cloud-notes/internal/handlers/user"
 	"cloud-notes/internal/logger"
 	"cloud-notes/internal/middleware"
 	"cloud-notes/internal/security"
 	authService "cloud-notes/internal/services/auth"
+	notesService "cloud-notes/internal/services/notes"
 	userService "cloud-notes/internal/services/user"
 	"cloud-notes/internal/storage"
 
@@ -35,9 +37,11 @@ func main() {
 
 	authSrv := authService.New(log, st, sec)
 	userSrv := userService.New(log, st)
+	notesSrv := notesService.New(log, st)
 
 	auth := authHandler.New(log, authSrv)
 	user := userHandler.New(log, userSrv)
+	notes := notesHandler.New(log, notesSrv)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logging(log))
@@ -49,6 +53,14 @@ func main() {
 				r.Get("/profile", user.GetProfile)
 				r.Put("/profile", user.UpdateProfile)
 				r.Delete("/profile", user.DeleteProfile)
+			})
+			r.Route("/notes", func(r chi.Router) {
+				r.Post("/", notes.CreateNote)
+				r.Get("/", notes.GetNotes)
+				r.Route("/{note-id}", func(r chi.Router) {
+					r.Put("/", notes.UpdateNote)
+					r.Delete("/", notes.DeleteNote)
+				})
 			})
 		})
 		r.Group(func(r chi.Router) {
