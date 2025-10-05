@@ -5,6 +5,13 @@ import (
 	"cloud-notes/internal/storage/users"
 )
 
+const (
+	UserStatusPending = users.StatusPending
+	UserStatusActive  = users.StatusActive
+	UserStatusBlocked = users.StatusBlocked
+	UserStatusDeleted = users.StatusDeleted
+)
+
 type Session = sessions.Session
 type User = users.User
 

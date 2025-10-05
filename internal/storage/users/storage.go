@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"cloud-notes/internal/database/postgres"
@@ -33,7 +34,9 @@ func (s *storage) scan(ctx context.Context, row postgres.Row) (*User, error) {
 	err := row.Scan(
 		&user.ID, &user.Login, &user.PasswordHash, &user.FirstName,
 		&user.Timezone, &user.Status, &user.CreatedAt)
-	if err != nil {
+	if err != nil && errors.Is(err, postgres.ErrNoRows) {
+		return nil, nil
+	} else if err != nil {
 		log.ErrorContext(ctx, "", logger.Error(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

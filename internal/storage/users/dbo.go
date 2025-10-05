@@ -9,10 +9,10 @@ import (
 type UserStatus string
 
 const (
-	UserStatusPending UserStatus = "pending"
-	UserStatusActive  UserStatus = "active"
-	UserStatusBlocked UserStatus = "blocked"
-	UserStatusDeleted UserStatus = "deleted"
+	StatusPending UserStatus = "pending"
+	StatusActive  UserStatus = "active"
+	StatusBlocked UserStatus = "blocked"
+	StatusDeleted UserStatus = "deleted"
 )
 
 type User struct {

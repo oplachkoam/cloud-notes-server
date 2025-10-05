@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"cloud-notes/internal/database/postgres"
@@ -32,7 +33,9 @@ func (s *storage) scan(ctx context.Context, row postgres.Row) (*Session, error) 
 	session := new(Session)
 	err := row.Scan(&session.ID, &session.UserID,
 		&session.UserAgent, &session.CreatedAt)
-	if err != nil {
+	if err != nil && errors.Is(err, postgres.ErrNoRows) {
+		return nil, nil
+	} else if err != nil {
 		log.ErrorContext(ctx, "", logger.Error(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
