@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cloud-notes/internal/middleware"
 	"context"
 	"fmt"
 	"net/http"
@@ -24,6 +25,7 @@ func main() {
 	_ = redis.MustConnect(ctx, &cfg.Redis)
 
 	r := chi.NewRouter()
+	r.Use(middleware.Logging(log))
 	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
