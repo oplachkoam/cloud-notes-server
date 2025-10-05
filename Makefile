@@ -34,7 +34,7 @@ delete:
 
 migrate:
 	@echo "==> Миграции"
-	docker compose up migrator
+	docker compose up --build migrator
 
 delete-data:
 	@echo "==> Удаление данных"
