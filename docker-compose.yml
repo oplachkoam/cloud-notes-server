@@ -1,0 +1,82 @@
+name: cloud-notes
+
+services:
+  postgres:
+    container_name: cloud-notes-postgres
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - main
+
+  migrator:
+    container_name: cloud-notes-migrator
+    build:
+      context: .
+      dockerfile: cmd/migrator/Dockerfile
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - main
+
+  redis:
+    container_name: cloud-notes-redis
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - main
+
+  server:
+    container_name: cloud-notes-server
+    build:
+      context: .
+      dockerfile: cmd/server/Dockerfile
+    env_file: .env
+    ports:
+      - "8000:${SERVER_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${SERVER_PORT}/ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - main
+
+volumes:
+  postgres_data:
+    name: cloud-notes-postgres-data
+  redis_data:
+    name: cloud-notes-redis-data
+
+networks:
+  main:
+    name: cloud-notes-net
+    driver: bridge

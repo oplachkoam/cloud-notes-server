@@ -1,0 +1,50 @@
+version: "2"
+
+linters:
+  default: none
+
+  enable:
+    - govet         # Базовая проверка от Go
+    - staticcheck   # Главный набор умных проверок
+    - revive        # Логичная замена golint
+    - errcheck      # Проверка необработанных ошибок
+    - unused        # Неиспользуемые переменные/импорты
+    - misspell      # Опечатки в комментах/строках
+
+  settings:
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+        - name: var-naming
+          disabled: true
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+    - golines
+
+  settings:
+    golines:
+      max-len: 80
+
+issues:
+  max-same-issues: 1
+  max-issues-per-linter: 3
+
+output:
+  formats:
+    text:
+      print-linter-name: true
+      print-issued-lines: true
+
+  sort-order:
+    - linter
+    - file
+
+run:
+  timeout: 5m
+  tests: false
