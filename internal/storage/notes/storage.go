@@ -110,8 +110,8 @@ func (s *storage) Update(ctx context.Context, note *Note) error {
 	log := s.log.With(logger.String("op", op))
 
 	const sql = `UPDATE notes SET user_id = $1, title = $2, 
-                 text = $3, pinned = $4, updated_at = $6, 
-                 created_at = $7 WHERE id = $8`
+                 text = $3, pinned = $4, updated_at = $5, 
+                 created_at = $6 WHERE id = $7`
 
 	_, err := s.pg.Exec(
 		ctx, sql, note.UserID, note.Title, note.Text,
